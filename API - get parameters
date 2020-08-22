@@ -1,0 +1,206 @@
+var myUrl = "https://api.ethplorer.io/getAddressInfo/0x8A24B76EDEF05EC5582e1607838e29619a5d68D4?apiKey=EK-eWwk4-i3oTJ3E-SYLGf"
+
+async function getAddressInfo(){
+
+    var object = await fetch(myUrl)
+    var res = await object.json()
+    var addr = await res 
+console.log(addr)
+
+}
+
+getAddressInfo()
+
+--comments--
+Defining the array as a variable (varX) the below parameters can be isolated per coin with a loop:
+- token name (2): varX.tokens[""].tokenInfo.name
+- token symbol (3) (ticker): varX.tokens[""].tokenInfo.symbol 
+- token balance (new parameter): varX.tokens[""].balance
+
+++++++++++++++++++++++++++++++++++++++++
+
+var myUrlGecko = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=500&page=1&sparkline=true&price_change_percentage=1h%2C24h%2C7d"
+
+async function getGecko(){
+    var object = await fetch(myUrlGecko)
+    var res = await object.json()
+    var coins = await res
+console.log(coins)
+
+}
+
+getGecko()
+
+--comments--
+No API key needed
+Then defining the array as a variable the below parameters can be isolated per coin with a loop:
+- image (1): varX[""].image (gets URL of image) - coingecko provides max 250 coins only !!!
+- priceToday (7): varX[""].current_price
+(Name and symbol/ticker could also be pulled from this API instead of Ethplorer above)
+
+++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++
+
+var myUrlEscan = "https://api.etherscan.io/api?module=account&action=tokentx&address=0x8A24B76EDEF05EC5582e1607838e29619a5d68D4&startblock=0&endblock=999999999&sort=asc&apikey=3P2ZAVU1X5SP7R79F6HFBF17QZ12XHZ73W"
+
+async function getDate(){
+    var object = await fetch(myUrlEscan)
+    var res = await object.json()
+    var coins = await res
+console.log(coins)
+
+}
+
+getDate()
+
+--comments--
+Then defining the array as a variable the below parameter can be isolated per coin with a loop:
+- purchase date (7): varX[""].timestamp (gets number that needs to be converted to human readable date&time
+--> code for this is: 
+(from this link: https://ethereum.stackexchange.com/questions/7287/how-to-find-the-date-of-an-ethereum-transaction-while-parsing-it-with-web3)
+
+function humanTime(){
+    var date = temp1[0].timeStamp
+    var date1 = new Date(date*1000);
+    console.log(date1.toUTCString())
+
+}
+humanTime()
+
+++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++
+
+1. Api Call (Etherscan) - get transaction hash for further API call (see below)
+Get a list of ERC20 token Events by Address
+Etherscan link: https://etherscan.io/apis#accounts 
+
+
+var myUrlEtherscan ="https://api.etherscan.io/api?module=account&action=tokentx&address=0x8A24B76EDEF05EC5582e1607838e29619a5d68D4&startblock=0&endblock=999999999&sort=asc&apikey=3P2ZAVU1X5SP7R79F6HFBF17QZ12XHZ73W"
+
+    async function getHash(){
+        var object = await fetch(myUrlEtherscan)
+        var res = await object.json()
+        var hash = await res 
+    console.log(hash)
+
+    }
+
+    getHash()
+
+--comment--
+This delivers an array of all coins present in the wallet address. We now need to extract all the tx-hashes of this array into 
+a new array which we will then use to get the transactions featuring the remaining info we need, namely:
+- Purchase date (7)
+- Purchase amount (8)
+- Price paid (9)
+  
+--
+
+2. Api Call Etherscan 
+Get internal transactions by transaction hash 
+    Etherscan link: https://etherscan.io/apis#accounts 
+
+    var myUrlTxHash = "https://api.etherscan.io/api?module=account&action=txlistinternal&txhash=0x38abfd56288404de788c29e6865f012af19cf5ff3f1ee3fbc0d87f9014fc0455&apikey=3P2ZAVU1X5SP7R79F6HFBF17QZ12XHZ73W"
+
+    async function getIntTx(){
+        var object = await fetch(myUrlTxHash)
+        var res = await object.json()
+        var txHash = await res 
+    console.log(txHash)
+
+    }
+
+    getIntTx()
+
+    --comment--
+    then define timestamp as a new variable and use the function humanTime to convert the timestamp of the transaction to readable time:
+
+    function humanTime(){
+        var date = timeStamp
+        var date1 = new Date(date*1000);
+        console.log(date1.toUTCString())
+
+    }
+
+    humanTime()
+
+    --comment--
+    the token type and amount that was bought are not available from this API call :/
+    ¿how to get these 2 remaining parameters?
+
+
+++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++
+
+    QUESTIONS
+
+    Values are provided by the APIs with 18 decimals --> how to convert these numbers into human readable numbers?
+    Example:
+    BAT bought:
+        - Etherscan value: 3776958010350000000000
+        - Human readable: 3,776.958010350000000000
+
+++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++
+
+complete list of parameters for table:
+ 
+    <div class="table table-dark" id="nav-tabContent">
+                                
+        <table class="table table-striped table-hover table-bordered" cellspacing="0"></table>
+
+                <thead>
+                
+                    <th scope="col">Image 
+                    <td id="coinImage"></td>
+                    </th>
+                    <th scope="col">Name</th>
+                    <td id="coinName"></td>
+                    </th>
+                    <th scope="col">Ticker</th>
+                    <td id="coinTicker"></td>
+                    </th>
+                    <th scope="col">Address</th>
+                    <td id="contractAddress"></td>
+                    </th>
+                    <th scope="col">PriceToday</th>
+                    <td id="priceToday"></td>
+                    </th>
+                    <th scope="col">Amount</th>
+                    <td id="coinAmount"></td>
+                    </th>
+                    <th scope="col">ValueToday</th>
+                    <td id="valueToday"></td>
+                    </th>
+                    <th scope="col">PurchaseDate</th>
+                    <td id="purchaseDate"></td>
+                    </th>
+                    <th scope="col">PurchasePrice</th>
+                    <td id="purchasePrice"></td>
+                    </th>
+                    <th scope="col">PurchaseValue</th>
+                    <td id="purchaseValue"></td>
+                    </th>
+                    <th scope="col">Change$</th>
+                    <td id="changeUS$"></td>
+                    </th>
+                    <th scope="col">Change%</th>
+                    <td id="change%"></td>
+                    </th>
+                
+                </thead>
+            
+        </table>
+    </div>
+
+++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++
+
+Goerge's method for adding content to list (but only one item per parameter):
+    $("#coinName").html(parameters[i].name);
+    $("#coinTicker").html(parameters[i].symbol);
+    $("#contractAddress").html(parameters[i].address);
+    $("#valueToday").html(parameters[i].balance);
+
+++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++

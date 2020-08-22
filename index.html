@@ -120,6 +120,7 @@
                                               <th>Name</th>
                                               <th>Ticker</th>
                                               <th>TokenAmount</th>
+                                              <th>PurchaseDate</th>
                                           </thead>
                                         
                                     </table>
@@ -141,8 +142,10 @@
         
         <script>
 
-          $( document ).ready(function() { searchingAddress()
+          $(document).ready(function() { searchingAddress()
           });
+          
+          // get token name, symbol and token amount via API call and populate table
 
           function searchingAddress(){ 
             //Transactions list: https://api.etherscan.io/api?module=account&action=txlist&address=0xaD5Bd7Fd4E46Bc446cfCB5eB725301E012E48401&startblock=0&endblock=99999999&page=1&offset=10&sort=asc&apikey=ZEXD47B82DE43I9ZYTYG177GXD91V7QNUF
@@ -179,8 +182,39 @@
             })
           })
         }
+        // get purchase date of token and convert to human readable date-time format, then add to table matching coin.
+        // A way to achieve this might be to order arrays alphabetically before looping through them, that way
+        // it doesn't matter what order the different API calls return the data as its always going to be from A-Z
+
+        getDate()
         
-     
+        var myUrlEscan = "https://api.etherscan.io/api?module=account&action=tokentx&address=0x8A24B76EDEF05EC5582e1607838e29619a5d68D4&startblock=0&endblock=999999999&sort=asc&apikey=3P2ZAVU1X5SP7R79F6HFBF17QZ12XHZ73W"
+
+        async function getDate(){
+            var object = await fetch(myUrlEscan)
+            var res = await object.json()
+            var coins = await res
+            
+            console.log(coins)
+
+            for (var i = 0; i < coins; i++) {
+              var pDate = `<tr>
+                    <td> `+ coins.result[i].timeStamp +`</td>
+                    </tr>`
+                    
+                    document.getElementById('tableContent').innerHTML += pDate;
+
+            }
+
+        }
+
+        function humanTime(){
+        var date = temp1[0].timeStamp
+        var date1 = new Date(date*1000);
+        console.log(date1.toUTCString())
+
+        }
+        humanTime()
 
         </script>
     </body>
