@@ -138,6 +138,8 @@
                 <th>Ticker</th>
                 <th>TokenAmount</th>
                 <th>PurchaseDate</th>
+                <th>PriceToday</th>
+                <th>PriceAtPurchase</th>
               </thead>
 
             </table>
@@ -165,6 +167,14 @@
     });
 
     // get token name, symbol and token amount via API call and populate table
+    // added token price today (could also be done via coingecko)
+    // adding token price at purchase is somewhat unprecise, as there is only
+    // a single price per day available and API doesn't allow for date format
+    // to include time of day - I assume the value returned is avg of a day
+    // would be great to find a way to pass the timeStamp as an argument for 
+    // more precise match with exact purchaseDate
+    // https://min-api.cryptocompare.com/pricing provides hourly historic data for free plan
+    // once a historic price is received and confirmed it could simply be hard coded into the field, so no more calls will be necessary
 
     function searchingAddress() {
 
@@ -181,12 +191,13 @@
 
             for (var i = 0; i < parameters.tokens.length; i++) {
               var decimals = parameters.tokens[i].tokenInfo.decimals
-              var bal = parseFloat(parameters.tokens.balance) / 100000000000000000
+              var bal = +parameters.tokens[i].balance
               var content = `<tr>
                     <td> `+ parameters.tokens[i].tokenInfo.name + `</td>
                     <td> `+ parameters.tokens[i].tokenInfo.symbol + `</td>
-                    <td> `+ bal + `</td>
+                    <td> `+ (bal/1000000000000000000).toLocaleString('fullwide', {useGrouping:false})+ `</td>
                     <td id="date` + parameters.tokens[i].tokenInfo.symbol + `"></td> 
+                    <td> `+ parameters.tokens[i].tokenInfo.price.rate + `</td>
                     </tr>`
 
               document.getElementById('tableContent').innerHTML += content;
@@ -202,33 +213,29 @@
     }
 
     // get purchase date of token and convert to human readable date-time format, then add to table matching coin.
-    // A way to achieve this might be to order arrays alphabetically before looping through them, that way
-    // it doesn't matter what order the different API calls return the data as its always going to be from A-Z
-    // ojo, eso es un bozeto !!! que falta depurar muchas cosas ...
-    // ¿ es necesario poner el ".catch(errr => {console.log(errr);})" otra vez ?
-    // ¿ como se incluye la funcion de formateo humanTime en la linea <td> para añadir timeStamp a la tabla ?
-   
 
-    var myUrlEscan = "https://api.etherscan.io/api?module=account&action=tokentx&address=0x8A24B76EDEF05EC5582e1607838e29619a5d68D4&startblock=0&endblock=999999999&sort=asc&apikey=3P2ZAVU1X5SP7R79F6HFBF17QZ12XHZ73W"
+      var myUrlEscan = "https://api.etherscan.io/api?module=account&action=tokentx&address=0x8A24B76EDEF05EC5582e1607838e29619a5d68D4&startblock=0&endblock=999999999&sort=asc&apikey=3P2ZAVU1X5SP7R79F6HFBF17QZ12XHZ73W"
 
-    async function getDate() {
+      async function getDate() {
+        
+          var object = await fetch(myUrlEscan)
+          var res = await object.json()
+          var coins = await res
+
+          for (var i = 0; i < coins.result.length; i++) {
+            var symbol = coins.result[i].tokenSymbol
+            var date = coins.result[i].timeStamp
+            var date1 = new Date(date * 1000);
+
+            $("#date"+ symbol).html(date1.toUTCString())
+
+          }
       
-        var object = await fetch(myUrlEscan)
-        var res = await object.json()
-        var coins = await res
-
-        for (var i = 0; i < coins.result.length; i++) {
-          var symbol = coins.result[i].tokenSymbol
-          var date = coins.result[i].timeStamp
-          var date1 = new Date(date * 1000);
-
-          $("#date"+ symbol).html(date1.toUTCString())
-
-        }
-     
-    }
-
-
+      }
+    
+    // coingecko API (endpoint: /coins/{id}/market_chart/range) lets you investigate
+    // price in time sequences of roughly 45 minutes, or 2500 Unix time units between
+    // the two timeStamps - it's not very precise, but its the best I found so far
 
 
   </script>
