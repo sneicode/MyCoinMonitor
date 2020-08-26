@@ -195,7 +195,7 @@
               var content = `<tr>
                     <td> `+ parameters.tokens[i].tokenInfo.name + `</td>
                     <td> `+ parameters.tokens[i].tokenInfo.symbol + `</td>
-                    <td> `+ (bal/1000000000000000000).toLocaleString('fullwide', {useGrouping:false})+ `</td>
+                    <td> `+ (bal/10**decimals).toLocaleString('fullwide', {useGrouping:false})+ `</td>
                     <td id="date` + parameters.tokens[i].tokenInfo.symbol + `"></td> 
                     <td> `+ parameters.tokens[i].tokenInfo.price.rate + `</td>
                     </tr>`
@@ -213,6 +213,7 @@
     }
 
     // get purchase date of token and convert to human readable date-time format, then add to table matching coin.
+       
 
       var myUrlEscan = "https://api.etherscan.io/api?module=account&action=tokentx&address=0x8A24B76EDEF05EC5582e1607838e29619a5d68D4&startblock=0&endblock=999999999&sort=asc&apikey=3P2ZAVU1X5SP7R79F6HFBF17QZ12XHZ73W"
 
@@ -232,12 +233,64 @@
           }
       
       }
+
+    // HOW TO GET IMAGE FILE PER COIN IN PORTFOLIO
+    // Image files will be pulled from Coingecko endpoint "/coins/markets"
+    // Need an array of all portfolio coins to loop through and get their respective image
+    // what is the unique identifier that matches with Coingecko? 
+    // So far the names we have pulled are from ETHplorer, but these don't match with the Coingecko names. 
     
+
+
+
+    // HOW TO GET HISTORIC PRICE OF PURCHASE FOR EACH COIN IN PORTFOLIO
     // coingecko API (endpoint: /coins/{id}/market_chart/range) lets you investigate
-    // price in time sequences of roughly 45 minutes, or 2500 Unix time units between
-    // the two timeStamps - it's not very precise, but its the best I found so far
+    // price in time sequences of roughly 41 minutes, or 2500 Unix time units between
+    // two timeStamps - it's not very precise, but its the best I found so far
+    // it needs to be done per coin, so this envolves 1 API call per coin (how to do
+    // this in an efficient way ??)
 
+    // FIRST: get all coins from coingecko -> these are 5880 coins!!!
+    // Alternative approach: simply use the variable "symbol" for a start and
+    // see if you can get the historic price that way
 
+    var urlGeckoCoins = "https://api.coingecko.com/api/v3/coins/list"
+    
+    getGeckoCoins()
+
+    async function getGeckoCoins(){
+      var object = await fetch(urlGeckoCoins)
+      var res = await object.json()
+      var allCoins = await res
+
+      console.log(allCoins);
+
+    }
+    
+    // SECOND: from allCoins create an array containing all coins of the portfolio 
+    // and matching those to "id" of coins in CoinGeckoList -> ¿how to do this?
+    
+
+    
+    // THIRD: loop through array "symbol" calling API for each historic price of each Coin in the portfolio
+    
+
+    
+    function getHistoricPrices(){
+
+    }
+    for (var i = 0; i < coins.symbol.length; i++) {
+       
+      var urlHistPrice = "https://api.coingecko.com/api/v3/coins/" + id + "/market_chart/range?vs_currency=usd&from=" + date + "&to=" + (date + 2500)
+      
+      async function getHistPerCoin(){
+              var object = await fetch(urlHistPrice)
+              var res = await object.json()
+              var coins = await res
+
+    console.log(coins);
+      }
+  }
   </script>
 </body>
 
